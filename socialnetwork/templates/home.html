@@ -1,0 +1,91 @@
+{% extends 'main_base.html' %}
+
+{% block main-content %}
+    {% load staticfiles %}
+
+    <div class="container-fluid page-header">
+
+        <div class="textarea-container">
+            <form id="post-form" action="{% url 'addPost' %}" method="post">
+                            <textarea rows="4" class="form-control autosize" name="content"
+                                      placeholder="Write a post here with at most 160 characters..."></textarea>
+                <div class="msg-composer">
+                    <div class="pull-left">
+                        <a href="#" class="btn btn-default"><i class="fa fa-camera"></i> Add Photos</a>
+                    </div>
+                    <div class="pull-right">
+                        <button type="submit" class="btn btn-primary send-btn pull-right">Send</button>
+                    </div>
+                </div>
+                {% csrf_token %}
+            </form>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <ul class="timeline">
+                    {% for post in posts %}
+                        <li class="timeline-indigo">
+                            {% if post.owner.picture_url %}
+                                <img class="timeline-icon" src="{{ post.owner.picture_url }}">
+                            {% else %}
+                                <img class="timeline-icon" src="/static/img/default-avatar.png">
+                            {% endif %}
+                            <div class="timeline-body">
+                                <div class="timeline-header">
+                                                <span class="author">Posted by <a
+                                                        href="{% url 'profile' user_id=post.owner.account.id %}">{{ post.owner.first_name }} {{ post.owner.last_name }}</a></span>
+                                    <span class="date">{{ post.post_date|date:"b-d-Y h:m:s" }}</span>
+                                </div>
+                                <div class="timeline-content">
+                                    <p>{{ post.content }}</p>
+                                </div>
+
+                                <hr>
+                                <div class="reply-panel panel-reply-{{ post.id }}">
+                                    {% for reply in post.postreply_set.all %}
+                                        <div class="chat-message chat-primary">
+                                            <div class="chat-contact">
+                                                <img class="reply-avatar" src="{% if reply.owner.picture_url %}
+                                                {{ reply.owner.picture_url }}
+                                                {% else %}
+                                                /static/img/default-avatar.png
+                                                {% endif %}">
+                                            </div>
+                                            <div class="chat-text">
+                                                <span class="author"><a style="color:white;font-weight: bold;"
+                                                                        href="{% url 'profile' user_id=reply.owner.account.id %}">{{ reply.owner.first_name }} {{ reply.owner.last_name }}</a></span>
+                                                <span class="date">{{ reply.reply_date|date:"b-d-Y h:m:s" }}</span>
+                                                <div>{{ reply.content }}</div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="input-group">
+                                    <input type="text" placeholder="Enter your message here"
+                                           class="form-control input-reply-{{ post.id }}">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default reply-btn"
+                                                id="reply-{{ post.id }}"><i class="fa fa-reply"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- jQuery Version 1.11.1 -->
+    <script src="{% static 'js/jquery-1.11.1.min.js' %}"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/autosize.min.js' %}"></script>
+    <script src="{% static 'js/post.js' %}"></script>
+    <script>
+        autosize($('textarea'));
+    </script>
+{% endblock %}

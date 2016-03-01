@@ -1,0 +1,127 @@
+{% extends 'main_base.html' %}
+
+{% block main-content %}
+    {% load staticfiles %}
+    <div class="page-heading">
+        <h1>View Profile</h1>
+    </div>
+    <div class="container-fluid" style="margin-top:30px">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="panel panel-profile">
+                    <div class="panel-body">
+                        <div class="user-card">
+                            <div class="avatar">
+                                {% if profile.picture_url %}
+                                    <img src="{{ profile.picture_url }}" class=" img-responsive img-circle"
+                                         style="height: 128px;width:128px">
+                                {% else %}
+                                    <img src="/static/img/default-avatar.png"
+                                         class="img-responsive img-circle">
+                                {% endif %}
+
+                            </div>
+                            <div class="contact-name">{{ profile.first_name }} {{ profile.last_name }}</div>
+                            <ul class="details">
+                                <li>Age: {{ profile.age|default_if_none:"" }}</li>
+                                <li>Followers: {{ followers.count }}</li>
+                            </ul>
+                        </div>
+                        <hr class="outsider">
+                        <div class="text-center">
+                            {% if user.id == profile.account.id %}
+                                <a href="{% url 'editProfile' %}" class="btn btn-primary btn-lg btn-block">Edit Profile
+                                    <i
+                                            class="fa fa-pencil" style="float:right"></i></a>
+                            {% elif followees.count > 0 %}
+                                <a href="{% url 'unfollow' profile.account.id %}"
+                                   class="btn btn-danger btn-lg btn-block ">Unfollow<i
+                                        class="fa fa-thumbs-down" style="float:right"></i></a>
+                            {% else %}
+                                <a href="{% url 'follow' profile.account.id %}"
+                                   class="btn btn-success btn-lg btn-block ">Follow<i
+                                        class="fa fa-thumbs-up" style="float:right"></i></a>
+                            {% endif %}
+
+                        </div>
+
+                        <hr class="outsider">
+                        <p>{{ profile.biography|default_if_none:"" }}</p>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h1>
+                            Post
+                        </h1>
+                    </div>
+                    <div class="panel-body">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="timeline">
+                                <ul class="timeline">
+                                    {% for post in posts %}
+                                        <li class="timeline-midnightblue">
+                                            {% if post.owner.picture_url %}
+                                                <img class="timeline-icon" src="{{ post.owner.picture_url }}">
+                                            {% else %}
+                                                <img class="timeline-icon" src="/static/img/default-avatar.png">
+                                            {% endif %}
+                                            <div class="timeline-body">
+                                                <div class="timeline-header">
+                                                <span class="author">Posted by <a
+                                                        href="{% url 'profile' user_id=post.owner.account.id %}">{{ post.owner.first_name }} {{ post.owner.last_name }}</a></span>
+                                                    <span class="date">{{ post.post_date }}</span>
+                                                </div>
+                                                <div class="timeline-content">
+                                                    <p>{{ post.content }}</p>
+                                                </div>
+                                                <hr>
+                                            <div class="reply-panel panel-reply-{{ post.id }}">
+                                                {% for reply in post.postreply_set.all %}
+                                                    <div class="chat-message chat-primary">
+                                                        <div class="chat-contact">
+                                                            <img class="reply-avatar" src="{% if reply.owner.picture_url %}
+                                                {{ reply.owner.picture_url }}
+                                                {% else %}
+                                                /static/img/default-avatar.png
+                                                {% endif %}">
+                                                        </div>
+                                                        <div class="chat-text">
+                                                <span class="author"><a style="color:white;font-weight: bold;"
+                                                                        href="{% url 'profile' user_id=reply.owner.account.id %}">{{ reply.owner.first_name }} {{ reply.owner.last_name }}</a></span>
+                                                            <span class="date">{{ reply.reply_date|date:"b-d-Y h:m:s" }}</span>
+                                                            <div>{{ reply.content }}</div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                            <div class="input-group">
+                                                <input type="text" placeholder="Enter your message here"
+                                                       class="form-control input-reply-{{ post.id }}">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default reply-btn"
+                                                id="reply-{{ post.id }}"><i class="fa fa-reply"></i>
+                                        </button>
+                                    </span>
+                                            </div>
+                                            </div>
+
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- jQuery Version 1.11.1 -->
+    <script src="{% static 'js/jquery-1.11.1.min.js' %}"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/post.js' %}"></script>
+{% endblock %}
